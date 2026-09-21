@@ -56,8 +56,16 @@ def reserve_server_socket(
                         socket.SO_EXCLUSIVEADDRUSE,
                         1,
                     )
-                # Deliberately do not set SO_REUSEADDR: ownership of the bound
-                # socket must prevent another process from taking this port.
+                elif sys.platform != "win32":
+                    # POSIX REUSEADDR only admits recently closed listeners
+                    # whose connections remain in TIME_WAIT; a live listener
+                    # still blocks the bind without SO_REUSEPORT. Windows
+                    # REUSEADDR can hijack a live port, so it stays strict.
+                    candidate_socket.setsockopt(
+                        socket.SOL_SOCKET,
+                        socket.SO_REUSEADDR,
+                        1,
+                    )
                 candidate_socket.bind(address)
                 return candidate_socket
             except OSError:
