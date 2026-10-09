@@ -1068,6 +1068,7 @@ export interface ModelOptions {
     steps: number
     guidance: number
   }> | null
+  qwen21_turbo_checkpoint?: boolean
   image_ref_inpaint?: boolean
   model_modes?: {
     choices: [string, number][]
