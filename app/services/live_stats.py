@@ -69,14 +69,9 @@ def get_live_stats() -> dict:
     if _nvml_ok and pynvml is not None:
         try:
             handle = pynvml.nvmlDeviceGetHandleByIndex(0)  # GPU 0
+            util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+            gpu_percent = float(util.gpu)
             gpu_available = True
-            try:
-                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                gpu_percent = float(util.gpu)
-            except Exception:
-                # A device handle is enough to prove that the GPU exists even
-                # when a particular utilization counter is unavailable.
-                gpu_percent = 0.0
 
             try:
                 mem = pynvml.nvmlDeviceGetMemoryInfo(handle)

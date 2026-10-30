@@ -84,7 +84,12 @@ class TestReserveServerSocket(unittest.TestCase):
         self.assertIsNone(result)
         self.assertEqual(len(created), 3)
         self.assertTrue(all(value.closed for value in created))
-        self.assertTrue(all(not any(option[1] == socket.SO_REUSEADDR for option in value.options) for value in created))
+        # POSIX REUSEADDR admits only TIME_WAIT leftovers; Windows stays strict.
+        expect_reuse = sys.platform != "win32"
+        self.assertTrue(all(
+            any(option[1] == socket.SO_REUSEADDR for option in value.options) is expect_reuse
+            for value in created
+        ))
 
     def test_actual_bind_host_is_used_in_resolution_and_bind(self):
         fake = _FakeSocket()
