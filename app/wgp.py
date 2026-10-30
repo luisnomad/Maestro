@@ -8083,6 +8083,8 @@ def generate_video(
     retake_end_frame=-1,
     retake_strength=1.0,
     retake_masks_path=None,
+    retake_user_start_anchor=None,
+    retake_user_end_anchor=None,
     retake_engine="native",
     regenerate_audio=True,
     # Reference-workflow two-stage pipeline (TenStrip 10Eros V5 config baked
@@ -10235,6 +10237,8 @@ def generate_video(
                     retake_end_frame=retake_end_frame,
                     retake_strength=retake_strength,
                     retake_masks_path=retake_masks_path,
+                    retake_user_start_anchor=retake_user_start_anchor,
+                    retake_user_end_anchor=retake_user_end_anchor,
                     retake_engine=retake_engine,
                     regenerate_audio=regenerate_audio,
                     reference_pipeline=reference_pipeline,
@@ -10405,6 +10409,13 @@ def generate_video(
                             output_new_audio_filepath = None
                     post_decode_pre_trim = samples.get("post_decode_pre_trim", 0)
                     _retake_stitch_info = samples.get("retake_stitch_info", None)
+                    if _retake_stitch_info is not None:
+                        # Native retake already covers the requested region.
+                        # Generic sliding-window tail removal shortens it;
+                        # the model's default FPS can also retime the source.
+                        fps = float(_retake_stitch_info["fps"])
+                        discard_last_frames = 0
+                        print(f"[Retake] Preserve native timeline: {samples['x'].shape[1]} frames at {fps:g} fps")
                     samples = samples.get("x", None)
 
                 if samples is not None:

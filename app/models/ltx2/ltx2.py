@@ -1521,6 +1521,8 @@ class LTX2:
         retake_end_frame: int = -1,
         retake_strength: float = 1.0,
         retake_masks_path: str | None = None,
+        retake_user_start_anchor: str | None = None,
+        retake_user_end_anchor: str | None = None,
         retake_engine: str = "native",
         regenerate_audio: bool = True,
         reference_pipeline: bool = False,
@@ -1957,6 +1959,9 @@ class LTX2:
             _is_spatial_inpaint = bool(retake_masks_path and os.path.isfile(retake_masks_path))
             # 2-frame tolerance handles slider-precision off-by-one from the UI.
             _is_end_of_clip = end_f >= total_frames - 2
+            from .retake_anchors import resolve_retake_anchors
+            start_frame_path = None
+            end_frame_path = None
             if _is_spatial_inpaint:
                 retake_images = []
                 print(f"[Retake Native] Spatial mask active — skipping boundary I2V anchors "
@@ -1974,6 +1979,17 @@ class LTX2:
                     end_frame_path = os.path.join(_retake_temp_dir, "end.png")
                     _PILImage.fromarray(_decord_frame_to_numpy(vr_source[min(end_f - 1, total_frames - 1)])).save(end_frame_path)
                     retake_images.append((end_frame_path, clip_frames - 1, input_video_strength))
+            retake_images = resolve_retake_anchors(
+                source_start=start_frame_path,
+                source_end=end_frame_path,
+                user_start=retake_user_start_anchor,
+                user_end=retake_user_end_anchor,
+                clip_frames=clip_frames,
+                strength=input_video_strength,
+                spatial_inpaint=_is_spatial_inpaint,
+            )
+            if retake_user_start_anchor or retake_user_end_anchor:
+                print(f"[Retake Native] Using explicit boundary image(s): {retake_images}")
             del vr, vr_source
 
             # Extract audio clip from original source for audio conditioning
