@@ -18,7 +18,7 @@ def _preset(name):
 
 @pytest.mark.parametrize(
     "preset, encoder",
-    [("h3_image", "nvfp4_awq"), ("h3_image_int8_encoder", "int8"), ("h3_image_bf16", "bf16")],
+    [("h3_image", "nvfp4_awq"), ("h3_image_int8_encoder", "int8"), ("h3_image_bf16", "int8")],
 )
 def test_presets_select_their_text_encoder(preset, encoder):
     model_def = image_handler.family_handler.query_model_def("h3_image", _preset(preset))
