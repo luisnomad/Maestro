@@ -627,6 +627,7 @@ def model_factory(
     *,
     model_def: dict,
     text_encoder_filename=None,
+    text_encoder_variant: str = "nvfp4_awq",
     VAE_dtype: torch.dtype | None = None,
     dtype: torch.dtype | None = None,
     **_kwargs,
@@ -669,7 +670,7 @@ def model_factory(
         text_encoder_filename,
         assets_root,
         dtype,
-        variant="nvfp4_awq",
+        variant=text_encoder_variant,
     )
     vae_filename = _resolve_checkpoint(
         (model_def or {}).get("minimax_h3_image_vae_filename"),
@@ -677,6 +678,7 @@ def model_factory(
     )
     vae = load_image_vae(vae_filename, dtype=VAE_dtype)
     runtime = MiniMaxH3ImageRuntime(transformer, conditioner, vae)
+    runtime.text_encoder_variant = text_encoder_variant
     pipe = {
         "transformer": runtime.transformer,
         "text_encoder": runtime.text_encoder,

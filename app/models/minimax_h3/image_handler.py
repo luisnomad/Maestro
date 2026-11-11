@@ -41,6 +41,26 @@ _CANVASES = {
 }
 
 
+TEXT_ENCODER_VARIANTS = ("nvfp4_awq", "int8", "bf16")
+
+
+def _text_encoder_variant(model_def) -> str:
+    """Return the preset's H3 text encoder; presets choose it with ``h3_image_text_encoder``."""
+
+    variant = str((model_def or {}).get("h3_image_text_encoder") or "nvfp4_awq")
+    if variant not in TEXT_ENCODER_VARIANTS:
+        raise ValueError(
+            f"MiniMax H3 Image text encoder must be one of {', '.join(TEXT_ENCODER_VARIANTS)}, got {variant!r}."
+        )
+    return variant
+
+
+def _text_encoder_file(variant: str) -> str:
+    if variant == "nvfp4_awq":
+        return TEXT_ENCODER_FILE
+    return os.path.basename(_text_encoder_variants()[variant]["URLs"][0])
+
+
 class family_handler:
     @staticmethod
     def query_supported_types():
@@ -60,6 +80,8 @@ class family_handler:
 
     @staticmethod
     def query_model_def(base_model_type, model_def):
+        encoder = _text_encoder_variant(model_def)
+        encoder_file = _text_encoder_file(encoder)
         return {
             "group": MODEL_FAMILY,
             "image_outputs": True,
@@ -103,16 +125,17 @@ class family_handler:
             "at_least_one_image_ref_needed": False,
             "inpaint_support": False,
             "text_encoder_folder": TEXT_ENCODER_FOLDER,
-            "text_encoder_URLs": _text_encoder_variants()["nvfp4_awq"]["URLs"],
+            "h3_image_text_encoder": encoder,
+            "text_encoder_URLs": _text_encoder_variants()[encoder]["URLs"],
             "compatible_text_encoder_paths": {
-                TEXT_ENCODER_FILE: [os.path.join(_WANGP_TEXT_ENCODER_FOLDER, TEXT_ENCODER_FILE)],
+                encoder_file: [os.path.join(_WANGP_TEXT_ENCODER_FOLDER, encoder_file)],
             },
             "minimax_h3_image_vae_filename": f"{ASSETS_FOLDER}/vae/{VAE_FILE}",
             "required_model_assets": [
                 f"{ASSETS_FOLDER}/vae/{VAE_FILE}",
             ],
             "required_model_asset_groups": [
-                [f"{TEXT_ENCODER_FOLDER}/{TEXT_ENCODER_FILE}", f"{_WANGP_TEXT_ENCODER_FOLDER}/{TEXT_ENCODER_FILE}"],
+                [f"{TEXT_ENCODER_FOLDER}/{encoder_file}", f"{_WANGP_TEXT_ENCODER_FOLDER}/{encoder_file}"],
                 [f"{TEXT_ENCODER_FOLDER}/text_encoder/config.json", f"{TEXT_ENCODER_FOLDER}/config.json"],
                 *(
                     [f"{TEXT_ENCODER_FOLDER}/processor/{name}", f"{TEXT_ENCODER_FOLDER}/{name}"]
@@ -149,6 +172,7 @@ class family_handler:
             model_filename,
             model_def=model_def,
             text_encoder_filename=kwargs.get("text_encoder_filename"),
+            text_encoder_variant=_text_encoder_variant(model_def),
             VAE_dtype=kwargs.get("VAE_dtype"),
             dtype=kwargs.get("dtype"),
         )

@@ -1,0 +1,35 @@
+{
+    "model": {
+        "name": "MiniMax H3 Image BF16 (Experimental)",
+        "architecture": "h3_image",
+        "description": "MiniMax H3 Image with BF16 transformer weights and the BF16 H3 text encoder, for machines with large unified or system memory. Same six-step model, references and canvases as the INT8 build.",
+        "selector_help": "BF16 transformer (~40 GB) and BF16 H3 32B text encoder (~51.5 GB). Highest fidelity Maestro offers for H3 Image; needs roughly 100 GB of combined memory.",
+        "URLs": [
+            "minimax_h3_image_pruned_bf16.safetensors"
+        ],
+        "download_sources": {
+            "minimax_h3_image_pruned_bf16.safetensors": {
+                "url": "https://huggingface.co/Comfy-Org/MiniMax-H3-Image/resolve/5e60435c12302e0fa946b35a309736eb25b9272b/diffusion_models/minimax_h3_image_pruned_bf16.safetensors",
+                "sha256": "a767f5325db019588b3491a93d80288d336c826a7aeb87bec67675e554367222",
+                "size_bytes": 40234657162,
+                "anonymous": true
+            }
+        },
+        "source_repo": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
+        "license_name": "MiniMax H3 Image Community License",
+        "license_url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/blob/6534ea1c979a5f8cb00c2bd1025d5ca4ee8d8901/LICENSE",
+        "model_size_gb": 92,
+        "h3_image_text_encoder": "bf16"
+    },
+    "prompt": "",
+    "negative_prompt": "",
+    "image_mode": 1,
+    "video_prompt_type": "I",
+    "resolution": "2048x2048",
+    "batch_size": 1,
+    "num_inference_steps": 6,
+    "guidance_scale": 1,
+    "sample_solver": "euler",
+    "prompt_enhancer": "",
+    "multi_prompts_gen_type": "FG"
+}
